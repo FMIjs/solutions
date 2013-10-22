@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.0.js"></script>
+    <script type="text/javascript" src="http://chaijs.com/chai.js"></script>
+    <script type="text/javascript" src="mocha.js"></script>
+    <link rel="stylesheet" href="mocha.css">
+
+    <script type="text/javascript">
+        $(function () {
+            var solution_filename,
+                assignment_id;
+            chai.should();
+            $('#assignment_id').on('change', function () {
+                assignment_id = $(this).find('option:selected').val();
+                $('script#test_script').detach();
+                var test_script = document.createElement('script');
+                test_script.id = 'test_script';
+                test_script.type = 'text/javascript';
+                test_script.src = assignment_id + '/test.js';
+                mocha.setup('bdd');
+                mocha.checkLeaks();
+                document.querySelector('head').appendChild(test_script);
+                test_script.onreadystatechange = test_script.onload = function () {
+                    $('#solution_fn').attr('disabled', false);
+                };
+            });
+
+            $('#solution_fn').on('change', function () {
+                solution_filename = $(this).find('option:selected').val() + '_hwASSIGNMENT.js';
+                $('script#solution_script').detach();
+                var solution_script = document.createElement('script');
+                solution_script.id = 'solution_script';
+                solution_script.type = 'text/javascript';
+                solution_script.src = assignment_id + '/' + solution_filename.replace('ASSIGNMENT', assignment_id);
+                document.querySelector('head').appendChild(solution_script);
+                solution_script.onreadystatechange = solution_script.onload = function () {
+                    $('#run_test').prop('disabled', false);
+                };
+            });
+
+            $('#run_test').on('click', function () {
+                $('div#mocha').empty();
+                mocha.run();
+            });
+        });
+    </script>
+</head>
+<body>
+    <select id="assignment_id">
+        <option value="__">Изберете задача</option>
+        <option value="01">01</option>
+    </select>
+    <select id="solution_fn" disabled>
+        <option value="__">Изберете факултетен номер</option>
+        <option value="44342">44342</option>
+        <option value="44739">44739</option>
+        <option value="61354">61354</option>
+        <option value="61451">61451</option>
+        <option value="61490">61490</option>
+        <option value="71081">71081</option>
+        <option value="71286">71286</option>
+        <option value="71329">71329</option>
+        <option value="71340">71340</option>
+        <option value="71371">71371</option>
+        <option value="71389">71389</option>
+        <option value="71392">71392</option>
+        <option value="80509">80509</option>
+        <option value="80527">80527</option>
+        <option value="80539">80539</option>
+        <option value="80606">80606</option>
+        <option value="80618">80618</option>
+        <option value="80630">80630</option>
+        <option value="80682">80682</option>
+        <option value="80693">80693</option>
+        <option value="80723">80723</option>
+        <option value="80755">80755</option>
+    </select>
+    <button id="run_test" disabled>Run test</button>
+    <div id="mocha"></div>
+</body>
+</html>
