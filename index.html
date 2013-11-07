@@ -6,17 +6,31 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.0.js"></script>
     <script type="text/javascript" src="http://chaijs.com/chai.js"></script>
     <script type="text/javascript" src="mocha.js"></script>
+    <script type="text/javascript" src="highlight.js"></script>
     <link rel="stylesheet" href="mocha.css">
+    <link rel="stylesheet" href="zenburn.css">
+    <style type="text/css">
+        pre code {
+            width: 70%;
+            left: 15%;
+            position: relative;
+        }
+    </style>
 
     <script type="text/javascript">
         $(function () {
             var solution_filename,
+                solution_code,
+                solution_script,
+                test_script,
                 assignment_id;
+
             chai.should();
+            solution_code = document.getElementById('solution_code');
             $('#assignment_id').on('change', function () {
                 assignment_id = $(this).find('option:selected').val();
                 $('script#test_script').detach();
-                var test_script = document.createElement('script');
+                test_script = document.createElement('script');
                 test_script.id = 'test_script';
                 test_script.type = 'text/javascript';
                 test_script.src = assignment_id + '/test.js';
@@ -24,61 +38,85 @@
                 mocha.checkLeaks();
                 document.querySelector('head').appendChild(test_script);
                 test_script.onreadystatechange = test_script.onload = function () {
-                    $('#solution_fn').attr('disabled', false);
+                    var $solution_fn = $('#solution_fn');
+                    $solution_fn.find('option[data-solved]').each(function () {
+                        this.disabled = 
+                            this.dataset.solved.split(',').indexOf(assignment_id) == -1;
+                    });
+                    $solution_fn.attr('disabled', false);
                 };
             });
 
             $('#solution_fn').on('change', function () {
                 solution_filename = $(this).find('option:selected').val() + '_hwASSIGNMENT.js';
+                solution_code.innerText = '';
+                $('div#mocha').empty();
                 $('script#solution_script').detach();
-                var solution_script = document.createElement('script');
+                solution_script = document.createElement('script');
                 solution_script.id = 'solution_script';
                 solution_script.type = 'text/javascript';
                 solution_script.src = assignment_id + '/' + solution_filename.replace('ASSIGNMENT', assignment_id);
                 document.querySelector('head').appendChild(solution_script);
                 solution_script.onreadystatechange = solution_script.onload = function () {
                     $('#run_test').prop('disabled', false);
+                    $('#show_solution').prop('disabled', false);
                 };
             });
 
             $('#run_test').on('click', function () {
-                $('div#mocha').empty();
                 mocha.run();
+            });
+
+            $('#show_solution').on('click', function () {
+                $.getScript(solution_script.src, function(data){
+                    solution_code.innerText = data;
+                    hljs.initHighlighting();
+                    location.href = '#';
+                    location.href = '#solution_code';
+                });
             });
         });
     </script>
 </head>
 <body>
-    <select id="assignment_id">
-        <option value="__">Изберете задача</option>
-        <option value="01">01</option>
-    </select>
-    <select id="solution_fn" disabled>
-        <option value="__">Изберете факултетен номер</option>
-        <option value="44342">44342</option>
-        <option value="44739">44739</option>
-        <option value="61354">61354</option>
-        <option value="61451">61451</option>
-        <option value="61490">61490</option>
-        <option value="71081">71081</option>
-        <option value="71286">71286</option>
-        <option value="71329">71329</option>
-        <option value="71340">71340</option>
-        <option value="71371">71371</option>
-        <option value="71389">71389</option>
-        <option value="71392">71392</option>
-        <option value="80509">80509</option>
-        <option value="80527">80527</option>
-        <option value="80539">80539</option>
-        <option value="80606">80606</option>
-        <option value="80618">80618</option>
-        <option value="80630">80630</option>
-        <option value="80682">80682</option>
-        <option value="80693">80693</option>
-        <option value="80723">80723</option>
-        <option value="80755">80755</option>
-    </select>
-    <button id="run_test" disabled>Run test</button>
+    <div>
+        <select id="assignment_id">
+            <option value="__">Изберете задача</option>
+            <option value="01">01</option>
+            <option value="02">02</option>
+        </select>
+        <select id="solution_fn" disabled>
+            <option value="__">Изберете факултетен номер</option>
+            <option value="44342" data-solved="01">44342</option>
+            <option value="44739" data-solved="01,02">44739</option>
+            <option value="61354" data-solved="01,02">61354</option>
+            <option value="61451" data-solved="01,02">61451</option>
+            <option value="61490" data-solved="01,02">61490</option>
+            <option value="71081" data-solved="01,02">71081</option>
+            <option value="71286" data-solved="01">71286</option>
+            <option value="71329" data-solved="01">71329</option>
+            <option value="71340" data-solved="01,02">71340</option>
+            <option value="71371" data-solved="01,02">71371</option>
+            <option value="71389" data-solved="01,02">71389</option>
+            <option value="71392" data-solved="01,02">71392</option>
+            <option value="80509" data-solved="01,02">80509</option>
+            <option value="80527" data-solved="01,02">80527</option>
+            <option value="80539" data-solved="01,02">80539</option>
+            <option value="80606" data-solved="01,02">80606</option>
+            <option value="80618" data-solved="01,02">80618</option>
+            <option value="80630" data-solved="01,02">80630</option>
+            <option value="80682" data-solved="01,02">80682</option>
+            <option value="80693" data-solved="01">80693</option>
+            <option value="80713" data-solved="02">80713</option>
+            <option value="80723" data-solved="01,02">80723</option>
+            <option value="80755" data-solved="01">80755</option>
+        </select>
+        <button id="run_test" disabled>Run test</button>
+        <button id="show_solution" disabled>Show solution</button>
+    </div>
     <div id="mocha"></div>
+    <div>
+        <pre> <code id="solution_code"> </code> </pre>
+    </div>
 </body>
 </html>
